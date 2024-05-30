@@ -1,0 +1,36 @@
+services:
+  database: 
+   image: mongo:latest
+   ports:
+     - "27016:27017"
+   container_name: mongodb
+
+  nginx: 
+   depends_on: 
+    - backend
+    - frontend
+   restart: always
+   build:
+    context: ./nginx
+    dockerfile: Dockerfile
+   ports:
+     - "3005:80"
+   
+  backend: 
+   build:
+    dockerfile: Dockerfile
+    context: ./backend
+   environment:
+    - PORT=5001
+    - DB_URL=mongodb://mongodb:27017/
+    - DB_NAME=docker
+   ports:
+   - "5001:5001"
+  
+  frontend: 
+   stdin_open: true
+   environment: 
+    - BACKEND_URL=http://backend
+   build:
+    dockerfile: Dockerfile
+    context: ./frontend
